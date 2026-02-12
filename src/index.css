@@ -1,0 +1,230 @@
+:root {
+  --primary: #ff4d6d;
+  --secondary: #ff8fa3;
+  --accent: #c9184a;
+  --bg-dark: #1a0b1c;
+  --glass: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --text-primary: #fff0f3;
+  --text-secondary: #ffccd5;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background-color: var(--bg-dark);
+  background-image:
+    url("https://www.transparenttextures.com/patterns/stardust.png"),
+    radial-gradient(circle at 15% 50%, rgba(255, 77, 109, 0.25), transparent 45%),
+    radial-gradient(circle at 85% 30%, rgba(201, 24, 74, 0.25), transparent 45%),
+    radial-gradient(circle at 50% 50%, rgba(255, 143, 163, 0.08), transparent 50%);
+  background-size: auto, 200% 200%, 200% 200%, 200% 200%;
+  animation: backgroundMove 20s ease infinite;
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 2rem 0;
+  position: relative;
+}
+
+@keyframes backgroundMove {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes heartFloat {
+  0% {
+    transform: translateY(100vh) scale(0) rotate(0deg);
+    opacity: 0;
+  }
+
+  20% {
+    opacity: 0.6;
+  }
+
+  80% {
+    opacity: 0.6;
+  }
+
+  100% {
+    transform: translateY(-100px) scale(1) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.heart-particle {
+  position: fixed;
+  pointer-events: none;
+  z-index: 0;
+  color: var(--primary);
+  opacity: 0;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 4px;
+}
+
+/* Utility Animations */
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.float-animation {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0% {
+    box-shadow: 0 0 15px rgba(255, 77, 109, 0.3);
+  }
+
+  50% {
+    box-shadow: 0 0 25px rgba(255, 77, 109, 0.6);
+  }
+
+  100% {
+    box-shadow: 0 0 15px rgba(255, 77, 109, 0.3);
+  }
+}
+
+.glow-effect {
+  animation: pulse-glow 3s infinite;
+}
+
+/* Glassmorphism Utility Refinement */
+.glass-card {
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow:
+    0 25px 60px rgba(0, 0, 0, 0.6),
+    inset 0 0 40px rgba(255, 255, 255, 0.03);
+  position: relative;
+}
+
+.glass-card::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent 40%, transparent 60%, rgba(255, 77, 109, 0.2));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Valentine's Day Enhancements */
+.valentine-badge {
+  position: absolute;
+  top: -12px;
+  right: 20px;
+  background: linear-gradient(135deg, #ff0844 0%, #ffb199 100%);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 12px rgba(255, 8, 68, 0.3);
+  z-index: 10;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+@keyframes ribbonFloat {
+
+  0%,
+  100% {
+    transform: translateY(0) rotate(2deg);
+  }
+
+  50% {
+    transform: translateY(-5px) rotate(-2deg);
+  }
+}
+
+.valentine-badge {
+  animation: ribbonFloat 3s ease-in-out infinite;
+}
+
+.heart-glow {
+  filter: drop-shadow(0 0 15px var(--primary));
+}
+
+.love-text {
+  background: linear-gradient(to right, #ff416c, #ff4b2b);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 800;
+}
+
+@keyframes shootingStar {
+  0% {
+    transform: translateX(0) translateY(0) rotate(-45deg) scale(0);
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 1;
+    scale: 1;
+  }
+
+  100% {
+    transform: translateX(-1000px) translateY(1000px) rotate(-45deg) scale(0);
+    opacity: 0;
+  }
+}
+
+.shooting-star {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 2px;
+  height: 100px;
+  background: linear-gradient(to bottom, var(--secondary), transparent);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+}
