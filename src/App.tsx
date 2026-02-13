@@ -304,13 +304,24 @@ const checkSpecialMatch = (data: UserData): LoveResult | null => {
   // if (fullName === "someone" && bYear === "2005" && bMonth === "05") { ... }
 
   // Special Match : Rajni 
-  
+
 
   // Special Match : batuk (Het Markana)
   // CHEAT KEY: Only triggers if Day is entered as "04"
   if (fullName === "het markana" && gender === "male" && (bYear === "2007" || bYear === "2008" || bYear === "2006")) {
     return {
       matchName: "Aakash Biswas",
+      zodiac: "Taurus",
+      zodiacTraits: "Reliable, patient, and devoted. A grounding presence who values stability.",
+      compatibility: 99,
+      message: "The cosmic alignment confirms: your heart has finally found its twin frequency.",
+      color: "#f72585"
+    };
+  }
+  //just demo 1
+  if (fullName === "abc" && gender === "male" && (bMonth === "12" || bDay === "28")) {
+    return {
+      matchName: "xyz",
       zodiac: "Taurus",
       zodiacTraits: "Reliable, patient, and devoted. A grounding presence who values stability.",
       compatibility: 99,
@@ -458,8 +469,9 @@ function App() {
 
     // CUSTOMIZE YOUR CHEAT REQUIREMENTS HERE:
     if (name === "akash biswas") return { day: false, month: false, year: true, anyRequired: true, isCheat: true }; // Only asks for Year
-    if (name === "het markana") return { day: true, month: false, year: false, anyRequired: true, isCheat: true }; // Only asks for Day
-    if (name === "priyansi patel") return { day: false, month: false, year: true, anyRequired: true, isCheat: true }; // Only asks for Month
+    if (name === "het markana") return { day: false, month: false, year: true, anyRequired: true, isCheat: true }; // Only asks for Year
+    if (name === "priyansi patel") return { day: false, month: false, year: true, anyRequired: true, isCheat: true }; // Only asks for Year
+    if (name === "abc") return { day: true, month: true, year: false, anyRequired: true, isCheat: true }; // Asks for Day or Month
 
     // Fully optional users (no DOB fields shown)
     const isFullyOptional = (

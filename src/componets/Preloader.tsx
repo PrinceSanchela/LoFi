@@ -42,7 +42,7 @@ const Preloader: React.FC<PreloaderProps> = ({ onFinish }) => {
         // Typing interval
         const typingInterval = setInterval(() => {
             if (index < typingText.length) {
-                setDisplayText((prev) => typingText.slice(0, index + 1));
+                setDisplayText(typingText.slice(0, index + 1));
                 index++;
             } else {
                 clearInterval(typingInterval);
