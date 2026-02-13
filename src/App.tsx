@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, Sparkles, ArrowRight, Stars, RefreshCcw, User, TriangleAlert, HeartOff, Moon } from 'lucide-react';
 import './App.css';
 import { askGemini } from './lib/gemini';
+import Preloader from './componets/Preloader';
 
 // Types
 type Gender = 'male' | 'female' | '';
@@ -58,7 +59,7 @@ const getZodiacIcon = (sign: string): string => {
 
 // --- NEW COMPONENT: Heart Particles ---
 const HeartParticles = () => {
-  const particles = Array.from({ length: 80 });
+  const particles = Array.from({ length: 40 });
   return (
     <div className="particles-overlay">
       {particles.map((_, i) => (
@@ -147,31 +148,7 @@ const ShootingStars = () => {
 
 
 // --- Internal Cosmic Engine (Offline Fallback) ---
-// Western / Global Data
-const GLOBAL_MALE = [
-  "Alexander", "Liam", "Noah", "Ethan", "Julian", "Gabriel", "Lucas", "Oliver", "Elijah", "Sebastian",
-  "Theodore", "Mateo", "Levi", "Asher", "James", "Leo", "Benjamin", "Henry", "William", "Michael",
-  "Daniel", "Logan", "Jackson", "David", "Joseph", "Samuel", "Carter", "Owen", "Wyatt", "John",
-  "Jack", "Luke", "Jayden", "Dylan", "Grayson", "Isaac", "Caleb", "Nathan", "Ryan", "Adrian",
-  "Atlas", "Jasper", "Silas", "Felix", "Soren", "Xavier", "Ezra", "Jude", "Milo", "Arlo"
-];
-
-const GLOBAL_FEMALE = [
-  "Sophia", "Olivia", "Isabella", "Mia", "Amelia", "Harper", "Evelyn", "Abigail", "Emily", "Luna",
-  "Charlotte", "Ava", "Aria", "Ella", "Scarlett", "Grace", "Chloe", "Penelope", "Layla", "Hazel",
-  "Nora", "Lily", "Aurora", "Violet", "Sofia", "Camila", "Eleanor", "Elizabeth", "Mila", "Gianna",
-  "Stella", "Zoey", "Paisley", "Audrey", "Claire", "Skylar", "Lucy", "Anna", "Samantha", "Maya",
-  "Nova", "Isla", "Freya", "Elara", "Seraphina", "Ophelia", "Lyra", "Iris", "Maeve", "Celeste"
-];
-
-const GLOBAL_SURNAMES = [
-  "Sterling", "Vance", "Hawthorne", "Mercer", "Ashford", "Kingsley", "Sinclair", "Davenport",
-  "Blackwood", "Frost", "Winter", "Sommers", "Fairchild", "Locke", "Thorne", "Rivers",
-  "Caldwell", "Drake", "Vale", "Wilde", "Chase", "Hunter", "Fox", "Wolf", "Knight",
-  "Ryder", "Storm", "Rain", "Cloud", "Skye", "Moon", "Star", "Rose", "Bloom", "Hart",
-  "Love", "Hope", "Faith", "Joy", "Grace", "Peace", "Light", "Bright", "Shine", "Glow",
-  "Nightshade", "Starlight", "Moonbeam", "Sunfire", "Cosmos", "Nebula", "Galaxy", "Orion", "Apex"
-];
+// Indian Data forces all matches to be authentic to the user's local culture preference.
 
 // Indian Data
 const INDIAN_MALE = [
@@ -192,42 +169,18 @@ const INDIAN_SURNAMES = [
   "Sharma", "Verma", "Gupta", "Malhotra", "Bhatia", "Saxena", "Mehta", "Joshi", "Patel", "Singh",
   "Kumar", "Das", "Chopra", "Desai", "Rao", "Nair", "Iyer", "Reddy", "Kapoor", "Khan",
   "Agarwal", "Jain", "Mishra", "Pandey", "Dubey", "Yadav", "Tiwari", "Sinha", "Chauhan", "Gill",
-  "Sandhu", "Garg", "Anand", "Sethi", "Bansal", "Goel", "Kaul", "Dhawan", "Khurana", "Ahuja"
+  "Sandhu", "Garg", "Anand", "Sethi", "Bansal", "Goel", "Kaul", "Dhawan", "Khurana", "Ahuja",
+  "Sanchela", "Thummar", "Biswas", "Vaghasiya", "Saravade", "Prajapati", "Thakkar", "Vyas"
 ];
 
 // Simple heuristic to detect if a name might be Indian to prefer Indian matches
-const detectRegion = (inputName: string): 'indian' | 'global' => {
-  const nameLower = inputName.toLowerCase();
-
-  // 1. Check for common Indian Surnames/Suffixes
-  const indianMarkers = [
-    "singh", "kaur", "patel", "sharma", "gupta", "kumar", "dev", "raj", "deep",
-    "verma", "yadav", "jain", "shah", "mehta", "nair", "rao", "reddy", "iyer",
-    "mishra", "pandey", "joshi", "chopra", "malhotra", "sanchela", "bhosale",
-    "deshmukh", "kulkarni", "patil", "pawar", "shinde", "jadhav", "gaikwad", "khan",
-    "agrawal", "bansal", "bhat", "nagar", "saxena", "sinha", "chatterjee", "dutta"
-  ];
-
-  if (indianMarkers.some(marker => nameLower.includes(marker))) {
-    return 'indian';
-  }
-
-  // 2. Check against known Indian First Names
-  const nameParts = nameLower.split(/\s+/);
-  const allIndianNames = [...INDIAN_MALE, ...INDIAN_FEMALE].map(n => n.toLowerCase());
-
-  if (nameParts.some(part => allIndianNames.includes(part))) {
-    return 'indian';
-  }
-
-  return 'global';
-};
+// (Mandated to use Indian pools globally now)
 
 const detectGenderFromName = (firstName: string): Gender | 'unknown' => {
   const name = firstName.trim().toLowerCase();
 
-  const maleNames = [...INDIAN_MALE, ...GLOBAL_MALE].map(n => n.toLowerCase());
-  const femaleNames = [...INDIAN_FEMALE, ...GLOBAL_FEMALE].map(n => n.toLowerCase());
+  const maleNames = INDIAN_MALE.map(n => n.toLowerCase());
+  const femaleNames = INDIAN_FEMALE.map(n => n.toLowerCase());
 
   if (maleNames.includes(name)) return 'male';
   if (femaleNames.includes(name)) return 'female';
@@ -241,24 +194,26 @@ const deterministicMatch = (data: UserData): LoveResult => {
   let hash = 0;
   for (let i = 0; i < seedString.length; i++) {
     hash = ((hash << 5) - hash) + seedString.charCodeAt(i);
-    hash = hash & hash;
+    hash = hash | 0; // Convert to 32bit integer
   }
-  const seed = Math.abs(hash);
 
-  const region = detectRegion(fullName);
+  // Inject DOB influence more aggressively into the seed
+  const dobParts = data.dob.split('-').map(Number);
+  const dobSum = dobParts.reduce((a, b) => a + b, 0);
+  const seed = Math.abs(hash ^ (dobSum * 1000));
 
-  // Select Pool based regarding region preference
-  let firstNames = region === 'indian' ? INDIAN_MALE : GLOBAL_MALE;
-  let surnamesPool = region === 'indian' ? INDIAN_SURNAMES : GLOBAL_SURNAMES;
+  // Select Pool (Mandated to be Indian matches)
+  let firstNames = INDIAN_MALE;
+  let surnamesPool = INDIAN_SURNAMES;
 
   // Gender logic
   if (data.gender === 'male') {
-    firstNames = region === 'indian' ? INDIAN_FEMALE : GLOBAL_FEMALE;
+    firstNames = INDIAN_FEMALE;
   } else if (data.gender === 'female') {
-    firstNames = region === 'indian' ? INDIAN_MALE : GLOBAL_MALE;
+    firstNames = INDIAN_MALE;
   } else {
     // Other: mix both
-    firstNames = [...(region === 'indian' ? INDIAN_MALE : GLOBAL_MALE), ...(region === 'indian' ? INDIAN_FEMALE : GLOBAL_FEMALE)];
+    firstNames = [...INDIAN_MALE, ...INDIAN_FEMALE];
   }
 
   // Generate Components
@@ -318,6 +273,9 @@ const checkSpecialMatch = (data: UserData): LoveResult | null => {
   const dob = data.dob;
   const gender = data.gender;
 
+  // Extract DOB parts for granular "cheat" control
+  const [bYear, bMonth, bDay] = dob ? dob.split('-') : ['', '', ''];
+
   // Easter Egg: Prince Sanchela (The Creator)
   if (fullName === "prince sanchela") {
     return {
@@ -342,25 +300,78 @@ const checkSpecialMatch = (data: UserData): LoveResult | null => {
     };
   }
 
-  // Special Match : Rajni 
+  // Example of using granular parts:
+  // if (fullName === "someone" && bYear === "2005" && bMonth === "05") { ... }
 
-  // Special Match : batuk
+  // Special Match : Rajni 
+  
+
+  // Special Match : batuk (Het Markana)
+  // CHEAT KEY: Only triggers if Day is entered as "04"
+  if (fullName === "het markana" && gender === "male" && (bYear === "2007" || bYear === "2008" || bYear === "2006")) {
+    return {
+      matchName: "Aakash Biswas",
+      zodiac: "Taurus",
+      zodiacTraits: "Reliable, patient, and devoted. A grounding presence who values stability.",
+      compatibility: 99,
+      message: "The cosmic alignment confirms: your heart has finally found its twin frequency.",
+      color: "#f72585"
+    };
+  }
 
   // Special Match : Shardool
+  if (fullName === "shardool prajapati" && gender === "male") {
+    return {
+      matchName: "Have Multiple crush",
+      zodiac: "Infinite",
+      zodiacTraits: "Reliable, patient, and devoted. A grounding presence who values stability.",
+      compatibility: +9999,
+      message: "The cosmic alignment confirms: your heart has not find single it have multiple baddies,  its twin frequency.",
+      color: "#f72585"
+    };
+  }
 
   // Special Match : Dhruv Rathi
-
-  // Special Match : kukdo
 
   // Special Match : yash vala
 
   // Special Match : aakash
-
+  // CHEAT KEY: Only triggers if Year is entered as "2004"
+  if (fullName === "akash biswas" && gender === "male" && (bYear === "2007" || bYear === "2008" || bYear === "2006")) {
+    return {
+      matchName: "Madhura Saravade",
+      zodiac: "Taurus",
+      zodiacTraits: "Reliable, patient, and devoted. A grounding presence who values stability.",
+      compatibility: 99,
+      message: `The stars confirm: ${bYear} was the year of your union. Your frequencies match perfectly.`,
+      color: "#f72585"
+    };
+  }
   // Special Match : madhura
-
+  if (fullName === "madhura saravade" && gender === "female") {
+    return {
+      matchName: "Akash Biswas",
+      zodiac: "Taurus",
+      zodiacTraits: "Reliable, patient, and devoted. A grounding presence who values stability.",
+      compatibility: 99,
+      message: "The cosmic alignment confirms: your heart has finally found its twin frequency.",
+      color: "#f72585"
+    };
+  }
   // krish
 
-  // priyanshi
+  // priyansi
+  // CHEAT KEY: Only triggers if Year is entered as "2005"
+  if (fullName === "priyansi patel" && gender === "female" && (bYear === "2007" || bYear === "2008" || bYear === "2006")) {
+    return {
+      matchName: "Dhruv Rathi",
+      zodiac: "Taurus",
+      zodiacTraits: "Reliable, patient, and devoted. A grounding presence who values stability.",
+      compatibility: 99,
+      message: "The cosmic alignment confirms: your heart has finally found its twin frequency.",
+      color: "#f72585"
+    };
+  }
 
   // Special Match : purv vaghasiya
   if (fullName === "purv vaghasiya") {
@@ -379,36 +390,32 @@ const checkSpecialMatch = (data: UserData): LoveResult | null => {
 };
 
 // Async AI Match Logic
-const generateAIMatch = async (data: UserData): Promise<LoveResult> => {
+const generateAIMatch = async (data: UserData, dobConfig: any, requiredFields: string): Promise<LoveResult> => {
   try {
     const fullName = `${data.firstName} ${data.lastName}`;
-    const region = detectRegion(fullName);
-    const regionInstruction = region === 'indian'
-      ? `STRICT REQUIREMENT: The user is Indian. You MUST generate a matching name that is authentic to Indian culture (Modern or Traditional).`
-      : `Analyze the cultural origin of the name "${fullName}" and provide an authentically matching valentine name.`;
 
     const promptText = `
       You are the backend engine for a premium Valentine's Matchmaking application.
       
       USER DATA:
       - Full Name: ${fullName}
-      - Gender: ${data.gender}
-      - DOB: ${data.dob}
-      - Region: ${region}
-
-      TASKS:
-      1. ${regionInstruction}
-      2. Based on their DOB, calculate their compatibility with a fictional perfect match.
-      3. Generate a whimsical yet meaningful "Cosmic Message" for them.
+      - Input Gender: ${data.gender}
+      - Birth Info Provided: ${data.dob || "Optional/Partial"}
+      
+      STRICT REQUIREMENTS:
+      1. LOVE FOUND: You MUST identify a perfect soulmate for this user.
+      2. CULTURAL IDENTITY: The generated "matchName" MUST be an authentic Indian name (First + Surname).
+      3. GENDER ALIGNMENT: If the user is ${data.gender}, generate a match of the opposite gender.
+      4. COSMIC SYNC: ${dobConfig.anyRequired ? `Since the user provided their birth ${requiredFields}, use these coordinates to calculate a unique destiny.` : `Since this is a special cosmic entity, provide a uniquely tailored match.`}
       
       OUTPUT FORMAT (Strict JSON):
       {
-        "matchName": "String",
-        "zodiac": "Valid Zodiac Sign",
-        "zodiacTraits": "A single sentence describe their match's energy",
-        "compatibility": number (85-99),
-        "message": "A poetic, romantic sentence about their destiny",
-        "color": "A hex code that represents their shared vibe"
+        "matchName": "Full Indian name of the soulmate",
+        "zodiac": "Valid Zodiac Sign of the soulmate",
+        "zodiacTraits": "A single sentence describing their cosmic energy",
+        "compatibility": score between 85 and 99,
+        "message": "A poetic, romantic sentence about their destiny together",
+        "color": "A hex code representing their shared vibe"
       }
     `;
 
@@ -425,6 +432,7 @@ const generateAIMatch = async (data: UserData): Promise<LoveResult> => {
 };
 
 function App() {
+  const [isPreloading, setIsPreloading] = useState(true);
   const [step, setStep] = useState<'intro' | 'form' | 'loading' | 'result'>('intro');
   const [loadingText, setLoadingText] = useState("Connecting to Cosmic Database...");
   const [formData, setFormData] = useState<UserData>({ firstName: '', lastName: '', dob: '', gender: '' });
@@ -443,6 +451,41 @@ function App() {
   const [dobParts, setDobParts] = useState({ day: '', month: '', year: '' });
   const [isMonthOpen, setIsMonthOpen] = useState(false);
   const monthRef = useRef<HTMLDivElement>(null);
+
+  // Granular DOB control for "Cheat" users
+  const getDobConfig = () => {
+    const name = `${formData.firstName.trim().toLowerCase()} ${formData.lastName.trim().toLowerCase()}`;
+
+    // CUSTOMIZE YOUR CHEAT REQUIREMENTS HERE:
+    if (name === "akash biswas") return { day: false, month: false, year: true, anyRequired: true, isCheat: true }; // Only asks for Year
+    if (name === "het markana") return { day: true, month: false, year: false, anyRequired: true, isCheat: true }; // Only asks for Day
+    if (name === "priyansi patel") return { day: false, month: false, year: true, anyRequired: true, isCheat: true }; // Only asks for Month
+
+    // Fully optional users (no DOB fields shown)
+    const isFullyOptional = (
+      name === "shardool prajapati" ||
+      name === "madhura saravade" ||
+      name === "purv vaghasiya"
+    );
+
+    if (isFullyOptional) return { day: false, month: false, year: false, anyRequired: false, isCheat: false };
+
+    // Default: Everyone else needs full DOB
+    return { day: true, month: true, year: true, anyRequired: true, isCheat: false };
+  };
+
+  const dobConfig = getDobConfig();
+
+  const requiredFields = [
+    dobConfig.day && "Day",
+    dobConfig.month && "Month",
+    dobConfig.year && "Year"
+  ].filter(Boolean).join(", ");
+
+  const isDobReady = !dobConfig.anyRequired ||
+    ((!dobConfig.day || dobParts.day) &&
+      (!dobConfig.month || dobParts.month !== "") &&
+      (!dobConfig.year || (dobParts.year && dobParts.year.length === 4)));
 
   useEffect(() => {
     const { day, month, year } = dobParts;
@@ -470,27 +513,40 @@ function App() {
       }
     }
 
-    // 2. Full Logic (When all 3 fields have enough data)
-    if (day && month !== '' && year && year.length === 4 && !errorMsg) {
-      const d = parseInt(day);
-      const m = parseInt(month);
-      const y = parseInt(year);
-      const date = new Date(y, m, d);
+    // 2. Component Logic (Triggered when required parts according to dobConfig are present)
+    const isReady = !dobConfig.anyRequired ||
+      ((!dobConfig.day || day) &&
+        (!dobConfig.month || month !== "") &&
+        (!dobConfig.year || (year && year.length === 4)));
 
-      // Strict date combination check (prohibits Feb 30, etc.)
-      if (date.getFullYear() !== y || date.getMonth() !== m || date.getDate() !== d) {
-        errorMsg = 'Invalid date combination';
-      } else {
-        const monthStr = (m + 1).toString().padStart(2, '0');
-        const dayStr = d.toString().padStart(2, '0');
-        const dobString = `${y}-${monthStr}-${dayStr}`;
-        setFormData(prev => ({ ...prev, dob: dobString }));
-        setErrors(prev => ({ ...prev, dob: '' }));
-        return;
+    if (isReady && !errorMsg) {
+      // For cheat users, we construct a partial string (e.g. "2007--")
+      // For normal users, it will be a full "YYYY-MM-DD"
+      const yPart = year || "";
+      const mPart = month !== "" ? (parseInt(month) + 1).toString().padStart(2, '0') : "";
+      const dPart = day ? day.padStart(2, '0') : "";
+
+      const dobString = `${yPart}-${mPart}-${dPart}`;
+
+      // Additional check for full-date users to ensure logical consistency (Feb 30, etc.)
+      if (dobConfig.day && dobConfig.month && dobConfig.year) {
+        const d = parseInt(day);
+        const m = parseInt(month);
+        const y = parseInt(year);
+        const date = new Date(y, m, d);
+        if (date.getFullYear() !== y || date.getMonth() !== m || date.getDate() !== d) {
+          setErrors(prev => ({ ...prev, dob: 'Invalid date combination' }));
+          setFormData(prev => ({ ...prev, dob: '' }));
+          return;
+        }
       }
+
+      setFormData(prev => ({ ...prev, dob: dobString }));
+      setErrors(prev => ({ ...prev, dob: '' }));
+      return;
     }
 
-    // Cleanup: If code reaches here, date is incomplete or invalid
+    // Cleanup: Incomplete or invalid
     setFormData(prev => ({ ...prev, dob: '' }));
     setErrors(prev => ({ ...prev, dob: errorMsg }));
   }, [dobParts]);
@@ -534,24 +590,41 @@ function App() {
   const proceedToMatch = async () => {
     setStep('loading');
 
-    const sequences = ["Syncing with Cosmic Soul..."];
+    const sequences = [
+      "Consulting the Ancient Constellations...",
+      "Mapping your Soul's Vibration...",
+      "Calculating Quantum Compatibility...",
+      "Finalizing your Cosmic Match..."
+    ];
+
+    let seqIndex = 0;
+    const interval = setInterval(() => {
+      seqIndex++;
+      if (seqIndex < sequences.length) {
+        setLoadingText(sequences[seqIndex]);
+      }
+    }, 1200);
+
     setLoadingText(sequences[0]);
 
     try {
       // Check Special Match First (Overrides AI)
       const specialMatch = checkSpecialMatch(formData);
       if (specialMatch) {
+        clearInterval(interval);
         setResult(specialMatch);
         setStep('result');
         return;
       }
 
-      const match = await generateAIMatch(formData);
+      const match = await generateAIMatch(formData, dobConfig, requiredFields);
 
+      clearInterval(interval);
       setResult(match);
       setStep('result');
 
     } catch (e) {
+      clearInterval(interval);
       console.error("Match process failed:", e);
       setStep('form');
     }
@@ -571,15 +644,17 @@ function App() {
       return;
     }
 
-    // 2. Date Validation
-    if (!formData.dob) {
-      alert("Please enter a complete and valid Date of Birth.");
-      return;
-    }
+    // 2. Date Validation (Check only required parts based on dobConfig)
+    if (dobConfig.anyRequired) {
+      if (dobConfig.day && !dobParts.day) { alert("Please enter your birth day."); return; }
+      if (dobConfig.month && dobParts.month === "") { alert("Please select your birth month."); return; }
+      if (dobConfig.year && (!dobParts.year || dobParts.year.length < 4)) { alert("Please enter a valid 4-digit birth year."); return; }
 
-    if (errors.dob) {
-      alert(errors.dob);
-      return;
+      // If full date is required, check validity
+      if (dobConfig.day && dobConfig.month && dobConfig.year && errors.dob) {
+        alert(errors.dob);
+        return;
+      }
     }
 
     // 3. Gender Mismatch Check
@@ -591,7 +666,7 @@ function App() {
       }
     }
 
-    if (formData.firstName && formData.lastName && formData.dob && formData.gender) {
+    if (formData.firstName && formData.lastName && isDobReady && formData.gender) {
       proceedToMatch();
     }
   };
@@ -615,6 +690,9 @@ function App() {
 
   return (
     <div className="app-container">
+      <AnimatePresence>
+        {isPreloading && <Preloader onFinish={() => setIsPreloading(false)} />}
+      </AnimatePresence>
       <HeartParticles />
       <ShootingStars />
       <MagicTrail />
@@ -805,75 +883,102 @@ function App() {
                 <div className="section-label">
                   <Stars size={14} /> <span>Temporal Origin</span>
                 </div>
-                <div className="dob-container-p">
-                  <div className="dob-field" ref={monthRef}>
-                    <div
-                      onClick={() => setIsMonthOpen(!isMonthOpen)}
-                      className={`form-input-p dob-select ${isMonthOpen ? 'focused' : ''} ${formData.dob ? 'success' : ''}`}
-                    >
-                      {dobParts.month !== '' ? ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][parseInt(dobParts.month)] : "Month"}
-                      <div className={`dropdown-arrow ${isMonthOpen ? 'open' : ''}`}>▾</div>
-                    </div>
-                    <AnimatePresence>
-                      {isMonthOpen && (
-                        <motion.div
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 5 }}
-                          exit={{ opacity: 0, y: 10 }}
-                          className="custom-dropdown-list-p"
+
+                {!dobConfig.anyRequired ? (
+                  <div className="special-notice-p" style={{ animation: 'fadeIn 0.5s ease-out' }}>
+                    <Sparkles size={14} className="sparkle-icon" />
+                    <span>if have only one person with this name in india then don't need to set your date of birth</span>
+                  </div>
+                ) : dobConfig.isCheat ? (
+                  <div className="special-notice-p" style={{ animation: 'fadeIn 0.5s ease-out', borderStyle: 'solid', borderColor: 'rgba(255, 77, 109, 0.2)' }}>
+                    <TriangleAlert size={14} className="sparkle-icon" style={{ color: '#fbbf24' }} />
+                    <span>Multiple persons with this name found. Please provide your birth <strong>{requiredFields}</strong> below to identify your unique cosmic signature.</span>
+                  </div>
+                ) : null}
+
+                {dobConfig.anyRequired && (
+                  <div className="dob-container-p" style={{
+                    marginTop: dobConfig.isCheat ? '1rem' : '0',
+                    gridTemplateColumns: `${dobConfig.month ? '2fr' : ''} ${dobConfig.day ? '1fr' : ''} ${dobConfig.year ? '1.5fr' : ''}`.trim() || '1fr'
+                  }}>
+                    {dobConfig.month && (
+                      <div className="dob-field" ref={monthRef}>
+                        <div
+                          onClick={() => setIsMonthOpen(!isMonthOpen)}
+                          className={`form-input-p dob-select ${isMonthOpen ? 'focused' : ''} ${dobParts.month !== "" ? 'success' : ''}`}
                         >
-                          {["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].map((m, i) => (
-                            <div
-                              key={m}
-                              className={`dropdown-item-p ${dobParts.month === i.toString() ? 'active' : ''}`}
-                              onClick={() => {
-                                setDobParts({ ...dobParts, month: i.toString() });
-                                setIsMonthOpen(false);
-                                dayRef.current?.focus();
-                              }}
+                          {dobParts.month !== '' ? ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][parseInt(dobParts.month)] : "Month"}
+                          <div className={`dropdown-arrow ${isMonthOpen ? 'open' : ''}`}>▾</div>
+                        </div>
+                        <AnimatePresence>
+                          {isMonthOpen && (
+                            <motion.div
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 5 }}
+                              exit={{ opacity: 0, y: 10 }}
+                              className="custom-dropdown-list-p"
                             >
-                              {m}
-                            </div>
-                          ))}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
+                              {["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].map((m, i) => (
+                                <div
+                                  key={m}
+                                  className={`dropdown-item-p ${dobParts.month === i.toString() ? 'active' : ''}`}
+                                  onClick={() => {
+                                    setDobParts({ ...dobParts, month: i.toString() });
+                                    setIsMonthOpen(false);
+                                    if (dobConfig.day) dayRef.current?.focus();
+                                    else if (dobConfig.year) yearRef.current?.focus();
+                                  }}
+                                >
+                                  {m}
+                                </div>
+                              ))}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    )}
 
-                  <div className="dob-field">
-                    <input
-                      ref={dayRef}
-                      type="number"
-                      placeholder="DD"
-                      value={dobParts.day}
-                      onChange={(e) => {
-                        let val = e.target.value.slice(0, 2);
-                        const num = parseInt(val);
-                        if (!isNaN(num) && num > 31) val = '31';
-                        setDobParts({ ...dobParts, day: val });
-                        if (val.length === 2 || (num > 3 && num <= 31)) yearRef.current?.focus();
-                      }}
-                      className="form-input-p center-text"
-                    />
-                  </div>
+                    {dobConfig.day && (
+                      <div className="dob-field">
+                        <input
+                          ref={dayRef}
+                          type="number"
+                          placeholder="DD"
+                          value={dobParts.day}
+                          onChange={(e) => {
+                            let val = e.target.value.slice(0, 2);
+                            const num = parseInt(val);
+                            if (!isNaN(num) && num > 31) val = '31';
+                            setDobParts({ ...dobParts, day: val });
+                            if (dobConfig.year && (val.length === 2 || (num > 3 && num <= 31))) yearRef.current?.focus();
+                          }}
+                          className="form-input-p center-text"
+                        />
+                      </div>
+                    )}
 
-                  <div className="dob-field">
-                    <input
-                      ref={yearRef}
-                      type="number"
-                      placeholder="YYYY"
-                      value={dobParts.year}
-                      onChange={(e) => {
-                        let val = e.target.value.slice(0, 4);
-                        const currentYear = new Date().getFullYear();
-                        if (val.length === 4 && parseInt(val) > currentYear) val = currentYear.toString();
-                        setDobParts({ ...dobParts, year: val });
-                      }}
-                      className="form-input-p center-text"
-                    />
+                    {dobConfig.year && (
+                      <div className="dob-field">
+                        <input
+                          ref={yearRef}
+                          type="number"
+                          placeholder="YYYY"
+                          value={dobParts.year}
+                          onChange={(e) => {
+                            let val = e.target.value.slice(0, 4);
+                            const currentYear = new Date().getFullYear();
+                            if (val.length === 4 && parseInt(val) > currentYear) val = currentYear.toString();
+                            setDobParts({ ...dobParts, year: val });
+                          }}
+                          className="form-input-p center-text"
+                        />
+                      </div>
+                    )}
                   </div>
-                </div>
-                {errors.dob && <span className="input-error-p" style={{ textAlign: 'center', marginTop: '0.5rem' }}>{errors.dob}</span>}
+                )}
+                {dobConfig.anyRequired && dobConfig.day && dobConfig.month && dobConfig.year && errors.dob && (
+                  <span className="input-error-p" style={{ textAlign: 'center', marginTop: '0.5rem' }}>{errors.dob}</span>
+                )}
               </div>
 
               {/* Gender Section */}
@@ -908,7 +1013,7 @@ function App() {
 
               <button
                 type="submit"
-                disabled={!formData.firstName || !formData.lastName || !formData.dob || !formData.gender || !!errors.firstName || !!errors.lastName || !!errors.dob}
+                disabled={!formData.firstName || !formData.lastName || !isDobReady || !formData.gender || !!errors.firstName || !!errors.lastName || (dobConfig.day && dobConfig.month && dobConfig.year && !!errors.dob)}
                 className="btn-primary-p group"
               >
                 <motion.div

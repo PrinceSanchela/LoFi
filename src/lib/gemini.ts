@@ -12,10 +12,10 @@ export const askGemini = async (prompt: string): Promise<string> => {
   const model = genAI.getGenerativeModel({
     model: "gemini-3-flash-preview",
     generationConfig: {
-      temperature: 0.9,
+      temperature: 0.8,
       topP: 0.95,
       topK: 40,
-      maxOutputTokens: 2048,
+      maxOutputTokens: 500,
       responseMimeType: "application/json",
     }
   });
