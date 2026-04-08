@@ -1,11 +1,5 @@
 # 💖 Love Finder (LoFi) — The Cosmic AI Matchmaker
 
-[![Vite](https://img.shields.io/badge/Vite-B73BFE?style=for-the-badge&logo=vite&logoColor=FFD62E)](https://vitejs.dev/)
-[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Framer Motion](https://img.shields.io/badge/Framer_Motion-0055FF?style=for-the-badge&logo=framer&logoColor=white)](https://www.framer.com/motion/)
-[![Google Gemini](https://img.shields.io/badge/Google_Gemini-8E75C2?style=for-the-badge&logo=googlegemini&logoColor=white)](https://deepmind.google/technologies/gemini/)
-
 > **Unlock the secrets of the stars. Discover your true valentine and destiny with our premium AI astrology engine.**
 
 Love Finder is a sophisticated, visually stunning web application designed to find your "Cosmic Match" using advanced AI algorithms and celestial calculations. Built with a focus on premium aesthetics and interactive user experience, it blends the magic of astrology with the power of Google's Gemini AI.
